@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native'
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native'
 import processTheme from './utils/processTheme'
 import checkArgs from './utils/checkArgs'
 import checkInit from './utils/checkInit'
@@ -6,8 +6,9 @@ import * as types from './utils/types'
 import errorCodes from './errorCodes'
 
 const { StripeModule } = NativeModules
+const stripeEventEmitter = new NativeEventEmitter(StripeModule)
 
-class Stripe {
+class Stripe extends EventEmitter {
   stripeInitialized = false
 
   setOptions = (options = {}) => {
@@ -80,6 +81,14 @@ class Stripe {
     checkArgs(
       types.paymentRequestWithApplePayOptionsPropTypes,
       options, 'options', 'Stripe.paymentRequestWithApplePay'
+    )
+    
+    let eventEmitter = this
+    this.removeEventListeners()
+
+    this.onShippingMethodChanged = stripeEventEmitter.addListener(
+      'onShippingMethodChange',
+      (method) => { eventEmitter.emit('onShippingMethodChange', method) }
     )
     return StripeModule.paymentRequestWithApplePay(items, options)
   }
@@ -170,6 +179,14 @@ class Stripe {
     )
     return StripeModule.createSourceWithParams(params)
   }
+
+  removeEventListeners = () => {
+    if (this.onShippingMethodChange) {
+      this.onShippingMethodChange.remove();
+      this.onShippingMethodChange = null;
+    }
+  }
+
 }
 
 export default new Stripe()
