@@ -10,9 +10,10 @@
 #import <PassKit/PassKit.h>
 #import <Stripe/Stripe.h>
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #import <React/RCTConvert.h>
 
-@interface StripeModule : NSObject <RCTBridgeModule,
+@interface StripeModule : RCTEventEmitter <RCTBridgeModule,
 PKPaymentAuthorizationViewControllerDelegate,
 STPAddCardViewControllerDelegate>
 
