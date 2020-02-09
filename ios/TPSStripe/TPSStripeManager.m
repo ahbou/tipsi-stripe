@@ -27,6 +27,8 @@ NSString * const kErrorKeyNoPaymentRequest = @"noPaymentRequest";
 NSString * const kErrorKeyNoMerchantIdentifier = @"noMerchantIdentifier";
 NSString * const kErrorKeyNoAmount = @"noAmount";
 
+NSString * const kShippingEventName = @"onShippingMethodChange";
+
 @implementation RCTConvert (STPBankAccountHolderType)
 
 RCT_ENUM_CONVERTER(STPBankAccountHolderType,
@@ -108,8 +110,11 @@ NSString * const TPSPaymentNetworkVisa = @"visa";
     RCTPromiseRejectBlock promiseRejector;
 
     BOOL requestIsCompleted;
+    BOOL hasListeners;
 
     void (^applePayCompletion)(PKPaymentAuthorizationStatus);
+    void (^ _Nullable shippingMethodUpdateRequest)(PKPaymentRequestShippingMethodUpdate * _Nonnull);
+
     NSError *applePayStripeError;
 }
 
@@ -135,6 +140,19 @@ NSString * const TPSPaymentNetworkVisa = @"visa";
 }
 
 RCT_EXPORT_MODULE();
+
+- (void)startObserving {
+    hasListeners = YES;
+}
+
+- (void)stopObserving {
+    hasListeners = NO;
+}
+
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[kShippingEventName];
+}
 
 RCT_EXPORT_METHOD(init:(NSDictionary *)options errorCodes:(NSDictionary *)errors) {
     publishableKey = options[@"publishableKey"];
@@ -669,6 +687,16 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
     };
 
     [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:completion];
+}
+
+- (void)paymentAuthorizationViewController:(PKPaymentAuthorizationViewController *)controller
+                   didSelectShippingMethod:(PKShippingMethod *)shippingMethod
+                                   handler:(void (^)(PKPaymentRequestShippingMethodUpdate *update))completion  API_AVAILABLE(ios(11.0)){
+    NSLog(@"didSelectShippingMethod");
+    if (hasListeners) {
+        self.shippingMethodUpdateRequest = completion;
+        [self sendEventWithName: kShippingEventName body:@{@"selectedId": shippingMethod.identifier} ];
+    }
 }
 
 - (STPAPIClient *)newAPIClient {
