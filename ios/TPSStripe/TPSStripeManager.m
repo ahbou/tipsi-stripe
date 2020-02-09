@@ -549,6 +549,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
 - (void)shippingAddressViewController:(STPShippingAddressViewController *)addressViewController
                  didFinishWithAddress:(nonnull STPAddress *)address
                        shippingMethod:(nullable PKShippingMethod *)method {
+    NSLog(@"didFinishWithAddress")
     [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
     requestIsCompleted = YES;
     [self resolvePromise:[self convertAddressObject:address]];
