@@ -667,7 +667,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
                                    handler:(void (^)(PKPaymentRequestShippingMethodUpdate *update))completion  API_AVAILABLE(ios(11.0)){
     NSLog(@"didSelectShippingMethod");
     if (hasListeners) {
-        self.shippingMethodUpdateRequest = completion;
+        shippingMethodUpdateRequest = completion;
         [self sendEventWithName: kShippingEventName body:@{@"selectedId": shippingMethod.identifier} ];
     }
 }

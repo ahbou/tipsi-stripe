@@ -4,6 +4,7 @@ import checkArgs from './utils/checkArgs'
 import checkInit from './utils/checkInit'
 import * as types from './utils/types'
 import errorCodes from './errorCodes'
+import EventEmitter from 'react-native/Libraries/vendor/emitter/EventEmitter'
 
 const { StripeModule } = NativeModules
 const stripeEventEmitter = new NativeEventEmitter(StripeModule)
