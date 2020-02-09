@@ -556,33 +556,6 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
     return YES;
 }
 
-#pragma mark - STPShippingAddressViewControllerDelegate
-
-- (void)shippingAddressViewController:(STPShippingAddressViewController *)addressViewController
-                      didEnterAddress:(nonnull STPAddress *)address
-                           completion:(nonnull STPShippingMethodsCompletionBlock)completion {
-
-}
-
-- (void)shippingAddressViewController:(STPShippingAddressViewController *)addressViewController
-                 didFinishWithAddress:(nonnull STPAddress *)address
-                       shippingMethod:(nullable PKShippingMethod *)method {
-    NSLog(@"didFinishWithAddress")
-    [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
-    requestIsCompleted = YES;
-    [self resolvePromise:[self convertAddressObject:address]];
-}
-
-- (void)shippingAddressViewControllerDidCancel:(STPShippingAddressViewController *)addressViewController {
-    [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
-
-    if (!requestIsCompleted) {
-        requestIsCompleted = YES;
-        NSDictionary *error = [errorCodes valueForKey:kErrorKeyCancelled];
-        [self rejectPromiseWithCode:error[kErrorKeyCode] message:error[kErrorKeyDescription]];
-    }
-}
-
 - (NSDictionary *)convertAddressObject:(STPAddress*)address {
 
     NSDictionary *result = @{
