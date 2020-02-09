@@ -538,6 +538,49 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
     return YES;
 }
 
+#pragma mark - STPShippingAddressViewControllerDelegate
+
+- (void)shippingAddressViewController:(STPShippingAddressViewController *)addressViewController
+                      didEnterAddress:(nonnull STPAddress *)address
+                           completion:(nonnull STPShippingMethodsCompletionBlock)completion {
+
+}
+
+- (void)shippingAddressViewController:(STPShippingAddressViewController *)addressViewController
+                 didFinishWithAddress:(nonnull STPAddress *)address
+                       shippingMethod:(nullable PKShippingMethod *)method {
+    [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
+    requestIsCompleted = YES;
+    [self resolvePromise:[self convertAddressObject:address]];
+}
+
+- (void)shippingAddressViewControllerDidCancel:(STPShippingAddressViewController *)addressViewController {
+    [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
+
+    if (!requestIsCompleted) {
+        requestIsCompleted = YES;
+        NSDictionary *error = [errorCodes valueForKey:kErrorKeyCancelled];
+        [self rejectPromiseWithCode:error[kErrorKeyCode] message:error[kErrorKeyDescription]];
+    }
+}
+
+- (NSDictionary *)convertAddressObject:(STPAddress*)address {
+
+    NSDictionary *result = @{
+        @"name" : address.name,
+        @"line1" : address.line1,
+        @"line2" : address.line2,
+        @"city" : address.city,
+        @"state" : address.state,
+        @"postalCode" : address.postalCode,
+        @"country" : address.country,
+        @"phone" : address.phone,
+        @"email" : address.email
+    };
+
+    return result;
+}
+
 
 #pragma mark - STPAddCardViewControllerDelegate
 
